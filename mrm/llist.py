@@ -58,21 +58,27 @@ class llist:
     def insert_right_of(self, node, val):
         new_el = _lle(val, node)
         new_el._next = node._next
-        node._next._prev = new_el
+        if node._next:
+            node._next._prev = new_el
         node._next = new_el
         self._nodecount += 1
         return new_el
 
     def insert_left_of(self, node, val):
         new_el = _lle(val, node._prev, node)
-        node._prev._next = new_el
+        if node._prev:
+            node._prev._next = new_el
         node._prev = new_el
         self._nodecount += 1
+        if node == self._head:
+            self._head = new_el
         return new_el
 
     def drop(self, node):
-        node._prev._next = node._next
-        node._next._prev = node._prev
+        if node._prev:
+            node._prev._next = node._next
+        if node._next:
+            node._next._prev = node._prev
         if node is self._head:
             self._head = node._next
         self._nodecount -= 1
