@@ -16,8 +16,8 @@ def u_turn(heading):
 def go_dist(from_pt, heading, dist):
     return from_pt + dist * heading
 
-def as_xy(pt):
-    return pt.imag, pt.real
+def as_xy(pt, t=float):
+    return t(pt.imag), t(pt.real)
 
 def from_xy(x, y):
     return y + 1j * x
