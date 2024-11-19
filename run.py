@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import argparse
+from datetime import date
 import sys
 import time
 import traceback
@@ -61,11 +63,26 @@ def run_daypart(year, day_num, part_num, output):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('-y', type = int, required = True, help = 'Year to run.')
-    ap.add_argument('-d', type = int, required = True, help = 'Day to run. 0 for all.')
+    ap.add_argument('-y', type = int, help = 'Year to run.')
+    ap.add_argument('-d', type = int, help = 'Day to run. 0 for all.')
     ap.add_argument('-p', type = int, choices = [1, 2, 3], help = 'Only runs specified part 1, 2, or 3.')
     ap.add_argument('-o', action = 'store_true', help = 'Show optional output. Ignored for -d0.')
     args = ap.parse_args()
+
+    if not args.y:
+        args.y = date.today().year
+
+    # Current logic only works for 2024 event. Will need to see what next year brings.
+    if not args.d:
+        _, w, d = date.today().isocalendar()
+        if w < 45 or w > 48 or d < 1 or d > 5:
+            print('Day cannot be autodetermined. Please specify.')
+            sys.exit(1)
+        args.d = (w - 45) * 5 + d
+
+    if args.y != 2024:
+        print('Year must be 2024')
+        sys.exit(1)
 
     if args.d < 0 or args.d > 20:
         print('Day must be between 1 and 20 inclusive.  Use 0 for all')
