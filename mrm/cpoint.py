@@ -1,14 +1,14 @@
 ZERO = 0j
-UP = -1
-DOWN = 1
-LEFT = -1j
-RIGHT = 1j
+UP = -1j
+DOWN = 1j
+LEFT = -1
+RIGHT = 1
 
 def left_turn(heading):
-    return heading * 1j
+    return heading * -1j
 
 def right_turn(heading):
-    return heading * -1j
+    return heading * 1j
 
 def u_turn(heading):
     return heading * -1
@@ -17,10 +17,10 @@ def go_dist(from_pt, heading, dist):
     return from_pt + dist * heading
 
 def as_xy(pt, t=float):
-    return t(pt.imag), t(pt.real)
+    return t(pt.real), t(pt.imag)
 
 def from_xy(x, y):
-    return y + 1j * x
+    return x + 1j * y
 
 def adj_ortho(pt, constrain_pos = None):
     adj = [pt + o for o in [-1, -1j, 1, 1j]]
@@ -29,7 +29,7 @@ def adj_ortho(pt, constrain_pos = None):
     return [a for a in adj if a in constrain_pos]
 
 def adj_diag(pt, constrain_pos = None):
-    adj = [pt + y + x for y in [-1, 0, 1] for x in [-1j, 0, 1j]]
+    adj = [pt + y + x for y in [-1j, 0, 1j] for x in [-1, 0, 1]]
     if constrain_pos is None:
         return adj
     return [a for a in adj if a in constrain_pos]
