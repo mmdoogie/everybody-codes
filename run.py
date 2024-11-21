@@ -51,11 +51,11 @@ def run_daypart(year, day_num, part_num, output, submit):
         t_before = time.process_time()
 
         if part_num == 1:
-            daypart_val = day_module.part1(output)
+            daypart_val = str(day_module.part1(output))
         elif part_num == 2:
-            daypart_val = day_module.part2(output)
+            daypart_val = str(day_module.part2(output))
         else:
-            daypart_val = day_module.part3(output)
+            daypart_val = str(day_module.part3(output))
 
         t_after = time.process_time()
         exec_time = round(t_after - t_before, 3)
@@ -63,7 +63,7 @@ def run_daypart(year, day_num, part_num, output, submit):
         print(f'[{exec_time:>7.3f}] Day {day_str}, Part {part_num}: ', end='')
         if results is not None and part_num in results:
             if 'no_match' not in results or part_num not in results['no_match']:
-                daypart_expect = results[part_num]
+                daypart_expect = str(results[part_num])
                 passing = daypart_val == daypart_expect
                 pf_str = COLOR_PASS_STR if passing else COLOR_FAIL_STR
                 print(f'{daypart_val:<35}', f'{daypart_expect:<35}', pf_str)
