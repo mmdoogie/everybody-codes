@@ -12,6 +12,40 @@ import requests
 
 import mrm.ansi_term as ansi
 
+class APIData:
+    def __init__(self, token, year, day):
+        self._cache = {}
+        self._cookies = {'everybody-codes': token}
+        self.year = year
+        self.day = day
+
+    def seed(self):
+        if 'seed' in self._cache:
+            return self._cache['seed']
+        url = 'https://everybody.codes/api/user/me'
+        r = requests.get(url, cookies=self._cookies, timeout=5)
+        r.raise_for_status()
+        self._cache['seed'] = r.json()['seed']
+        return self._cache['seed']
+
+    def notes(self):
+        if 'notes' in self._cache:
+            return self._cache['notes']
+        url = f'https://everybody-codes.b-cdn.net/assets/{self.year}/{self.day}/input/{self.seed()}.json'
+        r = requests.get(url, cookies=self._cookies, timeout=5)
+        r.raise_for_status()
+        self._cache['notes'] = r.json()
+        return self._cache['notes']
+
+    def keys(self):
+        if 'keys' in self._cache:
+            return self._cache['keys']
+        url = f'https://everybody.codes/api/event/{self.year}/quest/{self.day}'
+        r = requests.get(url, cookies=self._cookies, timeout=5)
+        r.raise_for_status()
+        self._cache['keys'] = r.json()
+        return self._cache['keys']
+
 def prep_template(fn, year, day):
     with open('_template.py', 'r', encoding='utf8') as in_file:
         in_data = in_file.read()
@@ -20,17 +54,16 @@ def prep_template(fn, year, day):
     with open(fn, 'w', encoding='utf8') as out_file:
         out_file.write(in_data)
 
-data_cache = {}
-
-def decrypt_note(part):
+def decrypt_note(api, part):
     key_name = f'key{part}'
-    if key_name not in data_cache['keys']:
+    keys = api.keys()
+    if key_name not in keys:
         return None
 
-    key_str = data_cache['keys'][key_name]
+    key_str = keys[key_name]
     key_str = key_str[:20] + '~' + key_str[21:]
     key_bytes = key_str.encode('utf8')
-    note_bytes = bytes.fromhex(data_cache['notes'][str(part)])
+    note_bytes = bytes.fromhex(api.notes()[str(part)])
     iv_bytes = key_bytes[:16]
 
     cipher = AES.new(key_bytes, AES.MODE_CBC, iv=iv_bytes)
@@ -39,29 +72,9 @@ def decrypt_note(part):
 
     return clear_note
 
-def prep_data(fn, token, year, day, part):
-    cookies = {'everybody-codes': token}
+def prep_data(fn, api, part):
+    clear_note = decrypt_note(api, part)
 
-    if 'seed' not in data_cache:
-        url = 'https://everybody.codes/api/user/me'
-        r = requests.get(url, cookies=cookies, timeout=5)
-        r.raise_for_status()
-        data_cache['seed'] = r.json()['seed']
-
-    if 'notes' not in data_cache:
-        seed = data_cache['seed']
-        url = f'https://everybody-codes.b-cdn.net/assets/{year}/{day}/input/{seed}.json'
-        r = requests.get(url, cookies=cookies, timeout=5)
-        r.raise_for_status()
-        data_cache['notes'] = r.json()
-
-    if 'keys' not in data_cache:
-        url = f'https://everybody.codes/api/event/{year}/quest/{day}'
-        r = requests.get(url, cookies=cookies, timeout=5)
-        r.raise_for_status()
-        data_cache['keys'] = r.json()
-
-    clear_note = decrypt_note(part)
     if clear_note is None:
         print('Unable to fetch key for part. Exiting.')
         return False
@@ -71,11 +84,30 @@ def prep_data(fn, token, year, day, part):
 
     return True
 
+def update_results(api, force):
+    result_module_name = f'data.ec_{api.year}.results'
+    result_module = __import__(result_module_name, fromlist = [None])
+    answers = {int(k[-1]): v for k, v in api.keys().items() if k.startswith('answer')}
+    current = result_module.results[api.day]
+    if any(k in current and current[k] != answers[k] for k in answers):
+        print('Current answers:', current)
+        print('Conflict with received answers', answers)
+        if not force:
+            print(ansi.yellow('Skipping!'))
+            return
+        print(ansi.red('Overwriting!'))
+    if force or any(k not in current for k in answers):
+        print(ansi.blue('Results updated: ' + str(answers)))
+        result_module.results[api.day] = answers
+        result_module.results.save()
+    else:
+        print('Results already up to date')
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('-y', type = int, help = 'Year to prep.')
     ap.add_argument('-d', type = int, help = 'Day to prep.')
-    ap.add_argument('-p', type = int, choices = [0, 1, 2, 3], help = 'Only preps specified part 1, 2, or 3. Use 0 for template.')
+    ap.add_argument('-p', type = int, choices = [0, 1, 2, 3, 4], help = 'Only preps specified part 1, 2, or 3. Use 0 for template or 4 for answers.')
     ap.add_argument('-f', action = 'store_true', help = 'Force overwrite. Only valid with a specified part.')
     args = ap.parse_args()
 
@@ -102,7 +134,7 @@ def main():
         print('Part must be specified to force overwrite.')
         sys.exit(1)
 
-    part_nums = set([args.p]) if args.p is not None else set([0, 1, 2, 3])
+    part_nums = set([args.p]) if args.p is not None else set([0, 1, 2, 3, 4])
 
     print(f'Prepping {args.y} Day {args.d}')
 
@@ -119,16 +151,17 @@ def main():
             print(ansi.green('Preparing template.'))
             prep_template(template_file, args.y, args.d)
 
-    if any(p in part_nums for p in [1, 2, 3]):
+    if any(p in part_nums for p in [1, 2, 3, 4]):
         load_dotenv()
         token = getenv('EC_TOKEN')
         if token is None:
             print('Access token not found in .env')
             sys.exit(1)
+        api = APIData(token, args.y, args.d)
 
     part_names = {1: 'a', 2: 'b', 3: 'c'}
     for p in part_nums:
-        if p == 0:
+        if p in [0, 4]:
             continue
         data_file = f'data/ec_{args.y}/{args.d}-{part_names[p]}.txt'
         if path.isfile(data_file):
@@ -137,12 +170,15 @@ def main():
                 print(ansi.yellow('skipping!'))
             else:
                 print(ansi.red('overwriting!'))
-                prep_data(data_file, token, args.y, args.d, p)
+                prep_data(data_file, api, p)
         else:
             print(ansi.green(f'Attempting to fetch input for part {p}.'))
-            ok = prep_data(data_file, token, args.y, args.d, p)
+            ok = prep_data(data_file, api, p)
             if not ok:
                 break
+
+    if any(p in part_nums for p in [1, 2, 3, 4]):
+        update_results(api, args.f)
 
 if __name__ == '__main__':
     main()
