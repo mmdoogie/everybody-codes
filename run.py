@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from datetime import date
+from datetime import date, timedelta
 from os import getenv
 import sys
 import time
@@ -27,7 +27,19 @@ def do_submit(year, day, part, value):
     url = f'https://everybody.codes/api/event/{year}/quest/{day}/part/{part}/answer'
     r = requests.post(url, cookies=cookies, json=payload, timeout=5)
     r.raise_for_status()
-    print(ansi.blue(r.text))
+    result = r.json()
+    if 'correct' not in result:
+        print(ansi.yellow(r.text))
+        return
+
+    if result['correct']:
+        gtd = timedelta(seconds=result['globalTime'])
+        ltd = timedelta(seconds=result['localTime'])
+        print(ansi.green('CORRECT!'), f'Times: G={gtd} L={ltd}, Placed:', result['globalPlace'])
+    else:
+        len_ok = ansi.green('ok') if result['lengthCorrect'] else ansi.red('wrong')
+        ltr_ok = ansi.green('ok') if result['firstCorrect'] else ansi.red('wrong')
+        print(ansi.red('INCORRECT!'), f'Length: {len_ok}, 1st Letter: {ltr_ok}')
 
 def run_daypart(year, day_num, part_num, output, submit):
     day_str = f'{day_num:02d}'
