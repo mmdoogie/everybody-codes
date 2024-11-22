@@ -88,7 +88,10 @@ def update_results(api, force):
     result_module_name = f'data.ec_{api.year}.results'
     result_module = __import__(result_module_name, fromlist = [None])
     answers = {int(k[-1]): v for k, v in api.keys().items() if k.startswith('answer')}
-    current = result_module.results[api.day]
+    if api.day in result_module.results:
+        current = result_module.results[api.day]
+    else:
+        current = {}
     if any(k in current and current[k] != answers[k] for k in answers):
         print('Current answers:', current)
         print('Conflict with received answers', answers)
