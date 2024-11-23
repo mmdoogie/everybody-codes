@@ -28,25 +28,23 @@ def minmax_y(pos):
 
     return min_y, max_y
 
-def print_image(pos, use_char = False, default_char = ' ', highlight_char = False, highlight_fn = lambda x: x):
+def print_image(pos, use_char = False, default_char = ' ', highlighter = lambda x, y, c: c, margin = 1):
     min_x, min_y = min_xy(pos)
     max_x, max_y = max_xy(pos)
 
-    for y in range(min_y, max_y + 1):
-        for x in range(min_x, max_x + 1):
+    for y in range(min_y - margin, max_y + 1 + margin):
+        for x in range(min_x - margin, max_x + 1 + margin):
             if (x, y) in pos:
                 if use_char:
-                    if highlight_char == pos[(x, y)]:
-                        print(highlight_fn(pos[(x, y)]), end = '')
-                    else:
-                        print(pos[(x, y)], end = '')
+                    disp = pos[(x, y)]
                 else:
-                    print('**', end = '')
+                    disp = '**'
             else:
                 if use_char:
-                    print(default_char, end = '')
+                    disp = default_char
                 else:
-                    print('  ', end='')
+                    disp = '  '
+            print(highlighter(x, y, disp), end='')
         print()
 
 def make_image(pos, output):
