@@ -1,6 +1,6 @@
 def parse(fn):
     with open(fn, 'r', encoding='utf8') as f:
-        lines = [l.strip() for l in f.readlines()]
+        lines = [l.strip('\n') for l in f.readlines()]
     return lines
 
 def part1(output):
