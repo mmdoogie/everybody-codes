@@ -1,7 +1,7 @@
 from collections import Counter, deque
 from math import lcm, inf
 
-from mrm.cache import keycache
+from mrm.cache import Keycache
 from mrm.parse import ensure_equal_length
 
 def parse(fn):
@@ -20,7 +20,7 @@ def part1(output):
     idx = [(100 * i) % s for i, s in zip(incrs, wheel_sizes)]
     return ' '.join(wheels[n][x] for n, x in enumerate(idx))
 
-@keycache
+@Keycache(stats=True)
 def wheel_score(wheels, idx, *, key):
     vis = ''.join(wheels[n][x][::2] for n, x in enumerate(idx))
     cnt = Counter(vis)
@@ -53,7 +53,7 @@ def part2(output):
 
     return score
 
-@keycache
+@Keycache(stats=True)
 def leverpull(idx, left_pull, incrs, wheel_sizes, *, key):
     return tuple((x + i + left_pull) % s for x, i, s in zip(idx, incrs, wheel_sizes))
 
