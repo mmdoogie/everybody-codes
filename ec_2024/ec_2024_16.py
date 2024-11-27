@@ -1,4 +1,4 @@
-from collections import Counter, deque
+from collections import Counter, defaultdict
 from math import lcm, inf
 
 from mrm.cache import Keycache
@@ -65,24 +65,36 @@ def part3(output):
     wheels = [[l[w*4:w*4+3] for l in lines[2:]] for w in range(num_wheels)]
     wheel_sizes = [w.index('   ') if '   ' in w else len(w) for w in wheels]
 
-    idx = tuple(0 for i in incrs)
-    state = (idx, 256, 0)
-    to_explore = deque([state])
-    seen = set()
-    min_score = inf
-    max_score = 0
-    while to_explore:
-        src_idx, pulls_remain, src_score = to_explore.pop()
-        if pulls_remain == 0:
-            min_score = min(min_score, src_score)
-            max_score = max(max_score, src_score)
-            continue
-        for left_pull in [-1, 0, 1]:
-            dst_idx = leverpull(src_idx, left_pull, incrs, wheel_sizes, key=(src_idx, left_pull))
-            dst_score = src_score + wheel_score(wheels, dst_idx, key=dst_idx)
-            new_state = (dst_idx, pulls_remain - 1, dst_score)
-            if new_state not in seen:
-                to_explore.append(new_state)
-                seen.add(new_state)
+    state = tuple(0 for i in incrs)
+    pull_mins = {state: 0}
+    pull_maxs = {state: 0}
+    to_explore = [state]
 
-    return f'{max_score} {min_score}'
+    for pull in range(256):
+        next_explore = set()
+        next_nonunique = 0
+        next_mins = defaultdict(lambda:inf)
+        next_maxs = defaultdict(lambda:0)
+
+        for state in to_explore:
+            for left_pull in [-1, 0, 1]:
+                new_state = leverpull(state, left_pull, incrs, wheel_sizes, key=(state, left_pull))
+                score = wheel_score(wheels, new_state, key=new_state)
+                next_explore.add(new_state)
+                next_nonunique += 1
+                next_mins[new_state] = min(next_mins[new_state], pull_mins[state] + score)
+                next_maxs[new_state] = max(next_maxs[new_state], pull_maxs[state] + score)
+        to_explore, pull_mins, pull_maxs = next_explore, next_mins, next_maxs
+        if output:
+            print(f'Pull {pull:>3d} -> {next_nonunique:>4d} states ({len(to_explore):>3d} unique)', end=' ')
+            print(f'min {min(pull_mins.values()):>2d} max {max(pull_maxs.values()):>3d}')
+
+    if output:
+        hits, misses = leverpull.stats()
+        calls = hits + misses
+        print(f'Lever Pull  Cache: {calls:>8d} calls {hits:>8d} hits ({hits/calls*100:6.2f}%), {misses:>8d} misses ({misses/calls*100:6.2f}%)')
+        hits, misses = wheel_score.stats()
+        calls = hits + misses
+        print(f'Wheel Score Cache: {calls:>8d} calls {hits:>8d} hits ({hits/calls*100:6.2f}%), {misses:>8d} misses ({misses/calls*100:6.2f}%)')
+
+    return f'{max(pull_maxs.values())} {min(pull_mins.values())}'
