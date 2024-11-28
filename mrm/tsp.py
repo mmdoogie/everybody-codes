@@ -1,7 +1,17 @@
+"""Module for Traveling Salesman Problem algorithms"""
+
+__all__ = ['held_karp', 'held_karp_dist']
+
 from itertools import combinations
 from math import inf
 
 def held_karp(points, weights, dont_loop = False, start_point = None, min_fn = min, max_dist = inf):
+    """Applies the Held-Karp algorithm to determine the optimal Traveling Salesman route
+    This version returns both the distance and the path, use held_karp_dist if only distance is needed
+    start_point is only important with dont_loop; start_point can be rotated to in a loop
+    min_fn can be supplied to use a different metric, such as max
+    max_dist will return None, None early if all paths would exceed that distance
+    """
     n_pts = len(points)
     all_set = set(points)
     if start_point is not None:
@@ -33,6 +43,12 @@ def held_karp(points, weights, dont_loop = False, start_point = None, min_fn = m
     return None, None
 
 def held_karp_dist(points, weights, dont_loop = False, start_point = None, min_fn = min, max_dist = inf):
+    """Applies the Held-Karp algorithm to determine the optimal Traveling Salesman route
+    This version returns only the distance and does not store paths, use held_karp if the routing is needed
+    start_point is only important with dont_loop; start_point can be rotated to in a loop
+    min_fn can be supplied to use a different metric, such as max
+    max_dist will return None early if all paths would exceed that distance
+    """
     n_pts = len(points)
     all_set = set(points)
     if start_point is not None:

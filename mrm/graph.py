@@ -1,4 +1,16 @@
+"""Graph Theory related helper functions"""
+
+__all__ = ['prim_mst']
+
 def prim_mst(ngh, wts, start_point=None):
+    """Prim's Algorithm for Minimum Spanning Tree
+    Computes the minimum spanning tree for a graph using the provided neighbors and weights.
+    Returns the nodes and edges defining the MST of the connected component reachable from start_point.
+
+    ngh -- dict mapping hashable node ids to list of neighbor node ids
+    wts -- dict mapping (src, dest) node ids to weight of edge
+    start_point -- will be used as initial point if provided, otherwise one is randomly chosen
+    """
     in_set = set()
     out_set = set(ngh)
     edges = []

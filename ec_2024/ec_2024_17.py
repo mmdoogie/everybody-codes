@@ -1,10 +1,9 @@
 from collections import defaultdict
-from functools import reduce
 from itertools import product
-from operator import mul
 
 from mrm.graph import prim_mst
 from mrm.point import grid_as_dict, m_dist
+from mrm.util import big_pi
 
 def parse(fn):
     with open(fn, 'r', encoding='utf8') as f:
@@ -48,4 +47,4 @@ def part3(output):
         sizes += [sum(weights[e] for e in edges) + len(nodes)]
         remain.difference_update(nodes)
 
-    return reduce(mul, sorted(sizes, reverse=True)[:3])
+    return big_pi(sorted(sizes, reverse=True)[:3])

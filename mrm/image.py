@@ -1,3 +1,7 @@
+"""Module for functions related to displaying or outputting images"""
+
+__all__ = ['min_xy', 'max_xy', 'minmax_x', 'minmax_y', 'print_image', 'make_image', 'ocr_image']
+
 from io import BytesIO
 from subprocess import Popen, PIPE
 
@@ -5,30 +9,41 @@ from PIL import Image
 from PIL.ImageDraw import Draw
 
 def min_xy(pos):
+    """Return the minimum values for x and y in a group of point tuples"""
     min_x = min(p[0] for p in pos)
     min_y = min(p[1] for p in pos)
 
     return min_x, min_y
 
 def max_xy(pos):
+    """Return the maximum values for x and y in a group of point tuples"""
     max_x = max(p[0] for p in pos)
     max_y = max(p[1] for p in pos)
 
     return max_x, max_y
 
 def minmax_x(pos):
+    """Return the min and max values for x in a group of point tuples"""
     min_x = min(p[0] for p in pos)
     max_x = max(p[0] for p in pos)
 
     return min_x, max_x
 
 def minmax_y(pos):
+    """Return the min and max values for y in a group of point tuples"""
     min_y = min(p[1] for p in pos)
     max_y = max(p[1] for p in pos)
 
     return min_y, max_y
 
 def print_image(pos, use_char = False, default_char = ' ', highlighter = lambda x, y, c: c, margin = 1):
+    """Output a text-based representation of the points specified in pos.
+    Without use_char, present points will be represented with '**' and missing points with '  '.
+    With use_char, present points will output their dict value and missing points use default_char.
+    highlighter is a function which is given the location and character about to be output
+    and which returns the actual string to display at that location, allowing items to be highlighted
+    or key points added to the grid.
+    """
     min_x, min_y = min_xy(pos)
     max_x, max_y = max_xy(pos)
 
@@ -48,6 +63,10 @@ def print_image(pos, use_char = False, default_char = ' ', highlighter = lambda 
         print()
 
 def make_image(pos, output):
+    """Draws a PIL Image which represents the points given in pos.
+    Present points are filled black, missing points are left white.
+    If output is True, also show a text representation.
+    """
     min_x, min_y = min_xy(pos)
     max_x, max_y = max_xy(pos)
 
@@ -72,6 +91,9 @@ def make_image(pos, output):
     return img
 
 def ocr_image(img):
+    """Takes a drawn PIL Image and pipes it to gocr to recognize text/digits
+    Custom characters can be stored in .gocr for strange symbols or misreads
+    """
     raw_io = BytesIO()
     img.save(raw_io, 'ppm')
     raw_io.seek(0)

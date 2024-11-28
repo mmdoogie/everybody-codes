@@ -1,6 +1,18 @@
+"""Module for Dijkstra's Algorithm pathfinding"""
+
+__all__ = ['dijkstra', 'Dictlike']
+
 from collections import defaultdict
 
-def dijkstra(neighbors_dict, weights_dict = defaultdict(lambda: 1), start_point = None, end_point = None, keep_paths = True, dist_est = lambda x: 0, danger_ignore_visited = False):
+def dijkstra(neighbors_dict, weights_dict = defaultdict(lambda: 1), start_point = None,
+             end_point = None, keep_paths = True, dist_est = lambda x: 0, danger_ignore_visited = False):
+    """Performs a Dijkstra's Algorithm pathfinding using the neighbors and weights provided.
+    Starts from start_point and ends either when all paths are exhausted (end_point=None),
+    when the point end_point has been reached (end_point is a node), or when all end points are reached
+    (end_point is a list/set).
+    If keep_paths is False, only the final weights are returned.
+    Providing an admissible distance estimator for dist_est converts this to A*.
+    """
     visited = set()
     curr_point = start_point
 
@@ -56,7 +68,13 @@ def dijkstra(neighbors_dict, weights_dict = defaultdict(lambda: 1), start_point 
     return weights
 
 class Dictlike():
+    """Dictlike object acts like a read-only dictionary but where
+    'd[k]' and 'k in d' operations are provided by functions that can
+    compute values on the fly.
+    """
+
     def __init__(self, get_fn, contains_fn = lambda x: True):
+        """Creates a Dictlike object with the provided get and contains functions"""
         self.get_fn = get_fn
         self.contains_fn = contains_fn
 
