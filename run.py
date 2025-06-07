@@ -119,7 +119,7 @@ def main():
             print('Day cannot be autodetermined. Please specify.')
             sys.exit(1)
         args.d = (w - 45) * 5 + d
-    elif not args.d:
+    elif args.d is None:
         print('Day must be specified')
         sys.exit(1)
 
@@ -144,10 +144,10 @@ def main():
 
     if args.d == 0:
         ansi.clear_screen()
-        results = [run_daypart(args.y, day, part, False, False) for day in range(1, 21) for part in part_nums]
+        results = [run_daypart(args.y, day, part, False, False) for day in range(valid_days[0], valid_days[1] + 1) for part in part_nums]
         passing = sum(r[0] for r in results)
         total_time = sum(r[1] for r in results)
-        total_cnt = 20 * len(part_nums)
+        total_cnt = len(results)
         print(f'[{total_time:>7.3f}] Passing:', passing, 'of', total_cnt)
     else:
         for part_num in part_nums:
