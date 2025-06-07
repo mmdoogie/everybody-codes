@@ -41,11 +41,11 @@ def dist(pt1, pt2):
         raise ValueError('Point lengths must match to compute distance')
     return sum((a - b) ** 2 for a, b in zip(pt1, pt2)) ** 0.5
 
-def point_add(pt1, pt2):
-    """Return new point which is the sum pt1 + pt2 of all dimension components"""
+def point_add(pt1, pt2, scale=1):
+    """Return new point which is the sum pt1 + scale * pt2 of all dimension components"""
     if len(pt1) != len(pt2):
         raise ValueError('Point lengths must match to compute sum')
-    return tuple(a + b for a, b in zip(pt1, pt2))
+    return tuple(a + scale * b for a, b in zip(pt1, pt2))
 
 def point_sub(pt1, pt2):
     """Return new point which is the difference pt1 - pt2 of all dimension components"""
@@ -57,16 +57,20 @@ def point_neg(pt):
     """Return new point which is the negation of all dimension components"""
     return tuple(-p for p in pt)
 
-def grid_as_dict(grid, valid = lambda x: True):
+def grid_as_dict(grid, valid = lambda x: True, with_inv = False):
     """Convert a grid of text into a dictionary of 2D points mapping to corresponding characters.
     Points are only included subject to the valid function (defaults to accepting all points).
+    With with_inv = True, also return the inverse that maps unique characters to location lists.
     """
     res = {}
     for y, g in enumerate(grid):
         for x, c in enumerate(g):
             if valid(c):
                 res[(x, y)] = c
-    return res
+    if not with_inv:
+        return res
+    inv = {c: {k for k, v in res.items() if v == c} for c in set(res.values())}
+    return res, inv
 
 def polygon_area(pts):
     """Calculate the contained area inside a polygon defined by the list of points given

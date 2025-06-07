@@ -1,6 +1,67 @@
 """Graph Theory related helper functions"""
 
-__all__ = ['prim_mst']
+__all__ = ['bfs_dist', 'bfs_min_paths', 'connected_component', 'prim_mst']
+
+from collections import defaultdict, deque
+
+def connected_component(ngh, start_point):
+    """Connected Component
+    Returns the set of nodes that form a connected component using the provided neighbors
+
+    ngh -- dict mapping hashable node ids to list of neighbor node ids
+    start_point -- one node id in the desired component
+    """
+    component = set([start_point])
+    while True:
+        to_add = set(n for c in component for n in ngh[c] if n not in component)
+        component |= to_add
+        if len(to_add) == 0:
+            break
+    return component
+
+def bfs_dist(ngh, start_point):
+    """Breadth-First Search
+    Perform a breadth-first search, returning the dict mapping node id to iteration depth
+
+    ngh -- dict mapping hashable node ids to list of neighbor node ids
+    start_point -- node id of start point
+    """
+    weights = {start_point: 0}
+    explore_from = deque([start_point])
+    explored = set()
+    while explore_from:
+        src = explore_from.popleft()
+        if src in explored:
+            continue
+        explored.add(src)
+        dst = [n for n in ngh[src] if n not in explored and n not in explore_from]
+        for d in dst:
+            weights[d] = weights[src] + 1
+            explore_from.append(d)
+    return weights
+
+def bfs_min_paths(ngh, start_point):
+    """Breadth-First Search (all min paths)
+    Perform a breadth-first search, returning the dict mapping node id to all min paths
+
+    ngh -- dict mapping hashable node ids to list of neighbor node ids
+    start_point -- node id of start point
+    """
+    paths = defaultdict(list)
+    paths[start_point] = [[start_point]]
+    explore_from = deque([start_point])
+    explored = set()
+    while explore_from:
+        src = explore_from.popleft()
+        if src in explored:
+            continue
+        explored.add(src)
+        dst = [n for n in ngh[src] if n not in explored]
+        for d in dst:
+            paths[d] += [p + [d] for p in paths[src]]
+            if d not in explore_from:
+                explore_from.append(d)
+    return paths
 
 def prim_mst(ngh, wts, start_point=None):
     """Prim's Algorithm for Minimum Spanning Tree
