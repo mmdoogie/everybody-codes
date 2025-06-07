@@ -61,7 +61,6 @@ def decrypt_note(api, part):
         return None
 
     key_str = keys[key_name]
-    key_str = key_str[:20] + '~' + key_str[21:]
     key_bytes = key_str.encode('utf8')
     note_bytes = bytes.fromhex(api.notes()[str(part)])
     iv_bytes = key_bytes[:16]
