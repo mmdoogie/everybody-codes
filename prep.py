@@ -50,7 +50,7 @@ def prep_template(fn, year, day):
     with open('_template.py', 'r', encoding='utf8') as in_file:
         in_data = in_file.read()
     in_data = re.sub('{YEAR}', str(year), in_data)
-    in_data = re.sub('{DAY}', str(day), in_data)
+    in_data = re.sub('{DAY}', f'{day:02}', in_data)
     with open(fn, 'w', encoding='utf8') as out_file:
         out_file.write(in_data)
 
@@ -118,19 +118,27 @@ def main():
         args.y = date.today().year
 
     # Current logic only works for 2024 event. Will need to see what next year brings.
-    if not args.d:
+    if not args.d and args.y == date.today().year == 2024:
         _, w, d = date.today().isocalendar()
         if w < 45 or w > 48 or d < 1 or d > 5:
             print('Day cannot be autodetermined. Please specify.')
             sys.exit(1)
         args.d = (w - 45) * 5 + d
-
-    if args.y != 2024:
-        print('Year must be 2024')
+    elif not args.d:
+        print('Day must be specified.')
         sys.exit(1)
 
-    if args.d < 1 or args.d > 20:
-        print('Day must be between 1 and 20 inclusive.')
+    valid_years = [2024, 1]
+    if args.y not in valid_years:
+        print('Year must be in', valid_years)
+        sys.exit(1)
+
+    if args.y < 2000:
+        valid_days = (1, 3)
+    else:
+        valid_days = (1, 20)
+    if args.d < valid_days[0] or args.d > valid_days[1]:
+        print(f'Day must be between {valid_days[0]} and {valid_days[1]} inclusive.')
         sys.exit(1)
 
     if args.f and args.p is None:
@@ -142,7 +150,7 @@ def main():
     print(f'Prepping {args.y} Day {args.d}')
 
     if 0 in part_nums:
-        template_file = f'ec_{args.y}/ec_{args.y}_{args.d}.py'
+        template_file = f'ec_{args.y}/ec_{args.y}_{args.d:02}.py'
         if path.isfile(template_file):
             print(f'{template_file} already exists, ', end='')
             if not args.f:
@@ -166,7 +174,7 @@ def main():
     for p in part_nums:
         if p in [0, 4]:
             continue
-        data_file = f'data/ec_{args.y}/{args.d}-{part_names[p]}.txt'
+        data_file = f'data/ec_{args.y}/{args.d:02}-{part_names[p]}.txt'
         if path.isfile(data_file):
             print(f'{data_file} already exists, ', end='')
             if not args.f:
