@@ -33,8 +33,8 @@ def do_submit(year, day, part, value):
         return
 
     if result['correct']:
-        gtd = timedelta(seconds=result['globalTime'])
-        ltd = timedelta(seconds=result['localTime'])
+        gtd = timedelta(milliseconds=result['globalTime'])
+        ltd = timedelta(milliseconds=result['localTime'])
         print(ansi.green('CORRECT!'), f'Times: G={gtd} L={ltd}, Placed:', result['globalPlace'])
     else:
         len_ok = ansi.green('ok') if result['lengthCorrect'] else ansi.red('wrong')
@@ -123,7 +123,7 @@ def main():
         print('Day must be specified')
         sys.exit(1)
 
-    valid_years = [2024, 1]
+    valid_years = [2024, 1, 2]
     if args.y not in valid_years:
         print('Year must be in', valid_years)
         sys.exit(1)
