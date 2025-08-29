@@ -8,3 +8,4 @@ My Everybody Codes solutions, for fun comparisons!
 ### Stories
 
 * [[Story 1]](ec_1/README.md) - Echoes of Enigmatus - 9/9🐤
+* [[Story 2]](ec_2/README.md) - The Entertainment Hub - 9/9🐤
