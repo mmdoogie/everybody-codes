@@ -117,7 +117,7 @@ def main():
         args.y = date.today().year
 
     # Current logic only works for 2024 event. Will need to see what next year brings.
-    if not args.d and args.y == date.today().year == 2024:
+    if not args.d and args.y == date.today().year >= 2024:
         _, w, d = date.today().isocalendar()
         if w < 45 or w > 48 or d < 1 or d > 5:
             print('Day cannot be autodetermined. Please specify.')
@@ -127,7 +127,7 @@ def main():
         print('Day must be specified.')
         sys.exit(1)
 
-    valid_years = [2024, 1, 2]
+    valid_years = [2025, 2024, 1, 2]
     if args.y not in valid_years:
         print('Year must be in', valid_years)
         sys.exit(1)
