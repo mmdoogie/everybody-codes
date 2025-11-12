@@ -1,6 +1,9 @@
 from collections import defaultdict
 from itertools import combinations, pairwise
 
+from mrm.dijkstra import Dictlike
+from mrm.graph import bfs_dist
+
 def parse(fn):
     with open(fn, 'r', encoding='utf8') as f:
         lines = [l.strip('\n') for l in f.readlines()]
@@ -55,16 +58,13 @@ def part3(output=False):
         if b in a:
             included_names.add(a)
 
+    ngh = Dictlike(lambda x: {x + nxt for nxt in rules[x[-1]]})
     total_names = 0
     for n in ok_names - included_names:
-        curr_ending = {n[-1]: 1}
-        for l in range(len(n) + 1, 12):
-            next_ending = defaultdict(int)
-            for k, v in curr_ending.items():
-                for nxt in rules[k]:
-                    next_ending[nxt] += v
-            if l >= 7:
-                total_names += sum(next_ending.values())
-            curr_ending = next_ending
+        name_len = len(n)
+        names = bfs_dist(ngh, n, 11 - name_len)
+        for p in names.prios():
+            if p >= 7 - name_len:
+                total_names += len(names[p])
 
     return total_names
