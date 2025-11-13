@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import combinations, pairwise
 import math
 
@@ -51,6 +52,8 @@ def part1(output=False):
 def intersect(s1, s2):
     if s1 == s2:
         return 1
+    if s1[0] == s2[1] and s1[1] == s2[0]:
+        return 1
 
     s1a, s1b = s1
     s2a, s2b = s2
@@ -89,17 +92,56 @@ def part3(output=False):
     pattern = parse('data/ec_2025/08-c.txt')
     nails = 256
 
-    mc = 0
+    fwd_from_node = defaultdict(list)
+    fwd_to_node = defaultdict(list)
+    for a, b in pairwise(pattern):
+        fwd_from_node[min(a, b)] += [max(a, b)]
+        fwd_to_node[max(a, b)] += [min(a, b)]
+
+    max_cut = 0
     the_chop = None
-    for s1 in combinations(range(1, nails + 1), 2):
-        cut = sum(intersect(s1, s2) for s2 in pairwise(pattern))
-        if cut > mc:
-            mc = cut
-            the_chop = s1
+    for ca, cb in combinations(range(1, nails + 1), 2):
+        # Don't care about circle edges
+        if cb - ca == 1:
+            continue
+
+        # Start from fresh set when we have a new gap
+        # All paths to/from the gap node that are not directly adjacent will intersect
+        if cb - ca == 2:
+            active = defaultdict(int)
+            for dest in fwd_from_node[cb - 1]:
+                if dest != cb:
+                    active[dest] += 1
+            for src in fwd_to_node[cb - 1]:
+                if src < ca:
+                    active[src] += 1
+        else:
+            # Otherwise, expand/contract by only the possible changes from moving the end by one node
+            # Any path that touches the end node can no longer intersect
+            if cb in active:
+                active[cb] = 0
+            # Then add the paths from the most recently exposed node
+            for dest in fwd_from_node[cb - 1]:
+                if dest != cb:
+                    active[dest] += 1
+            for src in fwd_to_node[cb - 1]:
+                if src < ca:
+                    active[src] += 1
+
+        # If the current chop coincides with paths, we need to count those for only this round
+        coincide = 0
+        for dest in fwd_from_node[ca]:
+            if dest == cb:
+                coincide += 1
+        cut = sum(active.values()) + coincide
+
+        if cut > max_cut:
+            max_cut = cut
+            the_chop = (ca, cb)
 
     if not output:
-        return mc
+        return max_cut
 
     draw_pattern(nails, pattern, fn:='ec_2025_08-c.png', chop = the_chop)
     print(f'{fn} saved')
-    return mc
+    return max_cut
