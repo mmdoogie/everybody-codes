@@ -29,6 +29,19 @@ def adj_diag(pt, constrain_pos = None):
         return adj
     return [a for a in adj if a in constrain_pos]
 
+def adj_knight(pt, constrain_pos = None):
+    """Returns list of positions which are one chess knight move away in all directions
+    subject to being present in constrain_pos (use None to always return the full list).
+    """
+    dims = len(pt)
+    if dims != 2:
+        raise ValueError("Currently only defined for 2D points")
+    adj_1 = [(pt[0] + xi, pt[1] + yi) for xi, yi in product([-2, 2], [-1, 1])]
+    adj_2 = [(pt[0] + xi, pt[1] + yi) for yi, xi in product([-2, 2], [-1, 1])]
+    if constrain_pos is None:
+        return adj_1 + adj_2
+    return [a for a in adj_1 + adj_2 if a in constrain_pos]
+
 def m_dist(pt1, pt2):
     """Return Manhattan / grid distance between two points"""
     if len(pt1) != len(pt2):
