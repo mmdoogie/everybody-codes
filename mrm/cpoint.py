@@ -30,6 +30,14 @@ def as_xy(pt, t=float):
     """Converts complex point to cartesian components. t can be used to specify int/float."""
     return t(pt.real), t(pt.imag)
 
+def x(pt, t=int):
+    """Returns x cartesian component of complex point. t can be used to specify int/float."""
+    return t(pt.real)
+
+def y(pt, t=int):
+    """Returns y cartesian component of complex point. t can be used to specify int/float."""
+    return t(pt.imag)
+
 def from_xy(x, y):
     """Makes a complex point from cartesian components"""
     return x + 1j * y
