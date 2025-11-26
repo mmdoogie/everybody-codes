@@ -70,19 +70,20 @@ def point_neg(pt):
     """Return new point which is the negation of all dimension components"""
     return tuple(-p for p in pt)
 
-def grid_as_dict(grid, valid = lambda x: True, with_inv = False):
+def grid_as_dict(grid, valid = lambda x: True, with_inv = False, conv = str):
     """Convert a grid of text into a dictionary of 2D points mapping to corresponding characters.
     Points are only included subject to the valid function (defaults to accepting all points).
     With with_inv = True, also return the inverse that maps unique characters to location lists.
+    Conv function if provided is called on each character to transform it before storage.
     """
     res = {}
     for y, g in enumerate(grid):
         for x, c in enumerate(g):
             if valid(c):
-                res[(x, y)] = c
+                res[(x, y)] = conv(c)
     if not with_inv:
         return res
-    inv = {c: {k for k, v in res.items() if v == c} for c in set(res.values())}
+    inv = {conv(c): {k for k, v in res.items() if v == c} for c in set(res.values())}
     return res, inv
 
 def polygon_area(pts):
