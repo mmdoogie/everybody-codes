@@ -31,7 +31,7 @@ class APIData:
     def notes(self):
         if 'notes' in self._cache:
             return self._cache['notes']
-        url = f'https://everybody-codes.b-cdn.net/assets/{self.year}/{self.day}/input/{self.seed()}.json'
+        url = f'https://everybody.codes/assets/{self.year}/{self.day}/input/{self.seed()}.json'
         r = requests.get(url, cookies=self._cookies, timeout=5)
         r.raise_for_status()
         self._cache['notes'] = r.json()
