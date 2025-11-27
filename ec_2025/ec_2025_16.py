@@ -43,7 +43,6 @@ def part3(output=False):
     max_blocks = 202520252025000
 
     spell = spell_for_wall(wall)
-    print(sum(spell))
     wall_len = fn_binary_search(partial(calc_blocks_used, spell), 1000, lambda x: x > max_blocks, output=output)
 
     return wall_len[0]
