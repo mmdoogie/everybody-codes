@@ -24,7 +24,7 @@ def do_submit(year, day, part, value):
     cookies = {'everybody-codes': token}
     payload = {'answer': str(value)}
 
-    url = f'https://everybody.codes/api/event/{year}/quest/{day}/part/{part}/answer'
+    url = f'https://api.everybody.codes/event/{year}/quest/{day}/part/{part}/answer'
     r = requests.post(url, cookies=cookies, json=payload, timeout=5)
     r.raise_for_status()
     result = r.json()

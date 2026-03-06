@@ -22,7 +22,7 @@ class APIData:
     def seed(self):
         if 'seed' in self._cache:
             return self._cache['seed']
-        url = 'https://everybody.codes/api/user/me'
+        url = 'https://api.everybody.codes/user/me'
         r = requests.get(url, cookies=self._cookies, timeout=5)
         r.raise_for_status()
         self._cache['seed'] = r.json()['seed']
@@ -40,7 +40,7 @@ class APIData:
     def keys(self):
         if 'keys' in self._cache:
             return self._cache['keys']
-        url = f'https://everybody.codes/api/event/{self.year}/quest/{self.day}'
+        url = f'https://api.everybody.codes/event/{self.year}/quest/{self.day}'
         r = requests.get(url, cookies=self._cookies, timeout=5)
         r.raise_for_status()
         self._cache['keys'] = r.json()
