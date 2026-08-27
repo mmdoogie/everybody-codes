@@ -123,7 +123,7 @@ def main():
         print('Day must be specified')
         sys.exit(1)
 
-    valid_years = [2025, 2024, 1, 2, 3]
+    valid_years = [2025, 2024, 1, 2, 3, 4]
     if args.y not in valid_years:
         print('Year must be in', valid_years)
         sys.exit(1)
