@@ -10,3 +10,5 @@ My Everybody Codes solutions, for fun comparisons!
 
 * [[Story 1]](ec_1/README.md) - Echoes of Enigmatus - 9/9🐤
 * [[Story 2]](ec_2/README.md) - The Entertainment Hub - 9/9🐤
+* [[Story 3]](ec_3/README.md) - Melody Made of Code - 9/9🐤
+* [[Story 4]](ec_4/README.md) - The Digital Atelier - 9/9🐤
