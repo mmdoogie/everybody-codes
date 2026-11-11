@@ -108,16 +108,16 @@ def part3(output=False):
         adj[fm - 1].add(to - 1)
         adj[to - 1].add(fm - 1)
 
-    patterns = []
+    patterns = set()
     s1 = list(range(8))
-    for a, b in combinations(s1, 2):
-        s2 = [x for x in s1 if x not in {a, b}]
-        for c, d in combinations(s2, 2):
-            s3 = [x for x in s2 if x not in {c, d}]
-            for e, f in combinations(s3, 2):
-                s4 = [x for x in s3 if x not in {e, f}]
-                g, h = s4
-                patterns += [((a, b), (c, d), (e, f), (g, h))]
+    for ab in combinations(s1, 2):
+        s2 = [x for x in s1 if x not in ab]
+        for cd in combinations(s2, 2):
+            s3 = [x for x in s2 if x not in cd]
+            for ef in combinations(s3, 2):
+                gh = [x for x in s3 if x not in ef]
+                parts = [tuple(sorted(ab)), tuple(sorted(cd)), tuple(sorted(ef)), tuple(sorted(gh))]
+                patterns.add(tuple(sorted(parts)))
 
     max_resonance = 0
     remain = len(patterns) * (num_portals // 8)
@@ -134,7 +134,7 @@ def part3(output=False):
                 post_score += sum(d.values())
             remain -= 1
             max_resonance = max(max_resonance, pre_score - post_score)
-            if output and remain % 1000 == 0:
-                print(f'Remaining patterns: {remain:5} max resonance: {max_resonance}')
+            if output and remain % 10 == 0:
+                print(f'Remaining patterns: {remain:4} max resonance: {max_resonance}')
 
     return max_resonance
