@@ -1,6 +1,6 @@
 """Graph Theory related helper functions"""
 
-__all__ = ['bfs_dist', 'bfs_min_paths', 'connected_component', 'prim_mst']
+__all__ = ['all_components', 'bfs_dist', 'bfs_min_paths', 'connected_component', 'prim_mst']
 
 from collections import defaultdict, deque
 from .prioset import Prioset
@@ -19,6 +19,21 @@ def connected_component(ngh, start_point):
         if len(to_add) == 0:
             break
     return component
+
+def all_components(ngh):
+    """All Components
+    Returns the list of all connected components using the provided neighbors
+
+    ngh -- dict mapping hashable node ids to list of neighbor node ids
+    """
+    remain = set(ngh)
+    components = []
+    while remain:
+        at = remain.pop()
+        component = connected_component(ngh, at)
+        remain -= component
+        components += [component]
+    return components
 
 def bfs_dist(ngh, start_point, max_dist=0):
     """Breadth-First Search
