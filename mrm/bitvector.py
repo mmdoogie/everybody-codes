@@ -30,6 +30,7 @@ class Bitvector:
         if max_bit < need_bits:
             raise ValueError(f'{iv=} needs {ceil(log2(iv))} bits, which is less than {max_bit=}')
 
+        self._locked = False
         self.max_bit = ceil((max_bit + 1) / 8) * 8 - 1
         self.data = bytearray((self.max_bit + 1) // 8)
         for i, b in enumerate(reversed(bin(iv)[2:])):
@@ -43,6 +44,8 @@ class Bitvector:
 
     def __setitem__(self, bit: int, val: bool):
         """Sets the state of the specified bit index to val"""
+        if self._locked:
+            raise Exception('Bitvector was frozen due to prior immutable use, you may need a copy')
         if bit < 0 or bit > self.max_bit:
             raise IndexError(f'bit index out of range 0 to {self.max_bit}')
         if val:
@@ -62,6 +65,8 @@ class Bitvector:
         """Chainable function to clear a specific bit
         (returns the Bitvector being operated on)
         """
+        if self._locked:
+            raise Exception('Bitvector was frozen due to prior immutable use, you may need a copy')
         self[bit] = False
         return self
 
@@ -69,8 +74,15 @@ class Bitvector:
         """Chainable item to set a specific bit
         (returns the Bitvector being operated on)
         """
+        if self._locked:
+            raise Exception('Bitvector was frozen due to prior immutable use, you may need a copy')
         self[bit] = True
         return self
+
+    def copy(self) -> 'Bitvector':
+        """Make a new Bitvector with the same size and value"""
+        bv = Bitvector(max_bit=self.max_bit, iv=self.as_int())
+        return bv
 
     def copy_with(self, bit: int) -> 'Bitvector':
         """Chainable item to set a specific bit
@@ -78,6 +90,22 @@ class Bitvector:
         """
         bv = Bitvector(max_bit=self.max_bit, iv=self.as_int())
         bv[bit] = True
+        return bv
+
+    def copy_without(self, bit: int) -> 'Bitvector':
+        """Chainable item to clear a specific bit
+        (returns a new Bitvector being operated on)
+        """
+        bv = Bitvector(max_bit=self.max_bit, iv=self.as_int())
+        bv[bit] = False
+        return bv
+
+    def copy_update(self, bit: int, val: bool) -> 'Bitvector':
+        """Chainable item to update a specific bit
+        (returns a new Bitvector being operated on)
+        """
+        bv = Bitvector(max_bit=self.max_bit, iv=self.as_int())
+        bv[bit] = val
         return bv
 
     def __repr__(self):
@@ -101,6 +129,7 @@ class Bitvector:
 
     def __hash__(self) -> int:
         """Returns hash of Bitvector, which is its as_int() value."""
+        self._locked = True
         return self.as_int()
 
     @staticmethod
