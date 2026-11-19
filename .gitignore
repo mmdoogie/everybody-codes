@@ -163,4 +163,4 @@ cython_debug/
 
 *.prof
 *.lprof
-*.png
+/*.png
