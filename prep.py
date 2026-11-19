@@ -71,15 +71,20 @@ def decrypt_note(api, part):
 
     return clear_note
 
-def prep_data(fn, api, part):
+def prep_data(fn, api, part, quiet):
     clear_note = decrypt_note(api, part)
 
     if clear_note is None:
         print('Unable to fetch key for part. Exiting.')
         return False
 
+    data = clear_note.decode('utf-8')
+
     with open(fn, 'w', encoding='utf8') as out_file:
-        out_file.write(clear_note.decode('utf8'))
+        out_file.write(data)
+
+    if not quiet:
+        print(data)
 
     return True
 
@@ -111,6 +116,7 @@ def main():
     ap.add_argument('-d', type = int, help = 'Day to prep.')
     ap.add_argument('-p', type = int, choices = [0, 1, 2, 3, 4], help = 'Only preps specified part 1, 2, or 3. Use 0 for template or 4 for answers.')
     ap.add_argument('-f', action = 'store_true', help = 'Force overwrite. Only valid with a specified part.')
+    ap.add_argument('-q', action = 'store_true', help = 'Quiet mode: do not show newly-received data files.')
     args = ap.parse_args()
 
     if not args.y:
@@ -182,10 +188,10 @@ def main():
                 print(ansi.yellow('skipping!'))
             else:
                 print(ansi.red('overwriting!'))
-                prep_data(data_file, api, p)
+                prep_data(data_file, api, p, args.q)
         else:
             print(ansi.green(f'Attempting to fetch input for part {p}.'))
-            ok = prep_data(data_file, api, p)
+            ok = prep_data(data_file, api, p, args.q)
             if not ok:
                 break
 
